@@ -1,0 +1,338 @@
+{
+  "app_metadata": {
+    "title": "Project Clarity — Retail Search & Conversion Intelligence",
+    "subtitle": "Built & Containerized for Google Cloud Run (FastAPI + React + Apache ECharts)",
+    "last_refreshed_utc": "2026-10-05T22:30:00Z",
+    "dataplex_glossary_grounded": true,
+    "dataplex_glossary_id": "clarity-retail-search-glossary",
+    "biglake_iceberg_catalog": "your-gcp-project-id.lrc",
+    "serving_dataset": "serving_clarity_intelligence",
+    "data_agent_id": "clarity-retail-search-agent",
+    "ca_modes_supported": ["custom_data_agent", "inline_context"]
+  },
+  "kpi_cards": [
+    {
+      "id": "tail_query_cvr",
+      "label": "Long-Tail Query CVR (4+ Tokens)",
+      "value": "2.84%",
+      "baseline_value": "1.10%",
+      "delta": "+158.2% lift",
+      "status": "positive",
+      "glossary_term": "cvr_search_conversion_rate",
+      "description": "Position-debiased counterfactual conversion rate on complex 4+ token natural language queries."
+    },
+    {
+      "id": "rpss_revenue",
+      "label": "Revenue Per 1,000 Searches (RPSS)",
+      "value": "$142.60",
+      "baseline_value": "$94.40",
+      "delta": "+$48.20 (+51.1%)",
+      "status": "positive",
+      "glossary_term": "rpss_revenue_per_thousand_searches",
+      "description": "Attributed gross merchandise value generated per 1,000 completed search sessions."
+    },
+    {
+      "id": "tail_zero_result_rate",
+      "label": "Tail Query Zero-Result Rate",
+      "value": "8.4%",
+      "baseline_value": "38.0%",
+      "delta": "-29.6 pts (-77.9%)",
+      "status": "positive",
+      "glossary_term": "tail_query_cohort",
+      "description": "Fraction of search queries yielding null candidate items before semantic vector recovery."
+    },
+    {
+      "id": "data_trust_score",
+      "label": "4D Data & Model Trust Score",
+      "value": "96.4%",
+      "baseline_value": "90.0% SLA",
+      "delta": "PASS (4/4 Gates)",
+      "status": "positive",
+      "glossary_term": "position_bias_debiasing",
+      "description": "Weighted audit of Completeness (98.2%), Semantic Consistency (97.5%), Timeliness (95.0%), and Lineage Provenance (94.9%)."
+    }
+  ],
+  "abc_experiment_chart": {
+    "tiers": ["Head (1-2 Tokens)", "Torso (3 Tokens)", "Tail (4+ Tokens)"],
+    "arm_a_legacy_lexical_cvr": [4.82, 2.65, 1.10],
+    "arm_b_hybrid_vector_rrf_cvr": [4.95, 3.18, 2.15],
+    "arm_c_clarity_bqml_reranked_cvr": [5.34, 3.72, 2.84],
+    "arm_c_relative_lift_pct": [10.8, 40.4, 158.2],
+    "notes": "Arm A: Legacy BM25 | Arm B: SEARCH() + VECTOR_SEARCH RRF | Arm C: Position-Debiased BQML Boosted Tree"
+  },
+  "forecast_30d_chart": {
+    "dates": [
+      "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05",
+      "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10",
+      "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15",
+      "2026-10-16", "2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20",
+      "2026-10-21", "2026-10-22", "2026-10-23", "2026-10-24", "2026-10-25",
+      "2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30"
+    ],
+    "forecast_revenue_usd": [
+      48200, 48900, 49700, 50500, 51400,
+      52100, 52900, 53800, 54400, 54900,
+      55600, 56300, 57200, 57900, 58100,
+      59000, 59800, 60500, 61200, 61800,
+      62500, 63200, 64000, 64600, 65200,
+      66100, 66900, 67800, 68600, 69400
+    ],
+    "ci_95_lower_usd": [
+      44800, 45300, 46000, 46800, 47500,
+      48100, 48800, 49500, 50000, 50200,
+      50800, 51400, 52200, 52800, 53100,
+      53800, 54500, 55100, 55600, 56000,
+      56600, 57200, 57900, 58400, 58900,
+      59600, 60300, 61100, 61800, 62400
+    ],
+    "ci_95_upper_usd": [
+      51600, 52500, 53400, 54200, 55300,
+      56100, 57000, 58100, 58800, 59600,
+      60400, 61200, 62200, 62900, 63100,
+      64200, 65100, 65900, 66800, 67600,
+      68400, 69200, 70100, 70800, 71500,
+      72600, 73500, 74500, 75400, 76400
+    ],
+    "model_name": "TimesFM 2.0 (AI.FORECAST)",
+    "confidence_level": 0.95
+  },
+  "query_cohorts_table": [
+    {
+      "cohort_id": "Q-TAIL-01",
+      "sample_query": "ergonomic mesh home office chair under 300 lumbar support",
+      "query_tier": "tail",
+      "monthly_searches": 18400,
+      "legacy_cvr_pct": 1.05,
+      "clarity_cvr_pct": 3.12,
+      "cvr_lift_pct": 197.1,
+      "top_reranked_sku": "SKU-1001 (AeroMesh Ergonomic Chair - $279)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Lexical Synonym & Attribute Mismatch",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "Legacy BM25 failed on 'under 300' price predicate; AI.GENERATE_TABLE + VECTOR_SEARCH recovered 94% of relevant mesh chairs."
+        },
+        {
+          "hypothesis_id": "H2",
+          "title": "Historical Position Bias Buried SKU-1001 at Rank 7",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "Counterfactual Rank-1 BQML scoring promoted SKU-1001 from Rank 7 to Rank 1, increasing CTR from 2.8% to 14.2%."
+        },
+        {
+          "hypothesis_id": "H3",
+          "title": "Inventory Stockout Distortion",
+          "verdict": "REFUTED",
+          "evidence": "stg_catalog_items WHERE EXISTS check confirmed 98.4% in-stock availability across regional distribution centers."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 98.2,
+        "semantic_consistency": 97.5,
+        "timeliness": 95.0,
+        "provenance": 94.9
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.clarity_reranked_search_results",
+        "bytes_billed": 48234496,
+        "slot_ms": 1420,
+        "estimated_cost_usd": 0.00028,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 92.4
+      }
+    },
+    {
+      "cohort_id": "Q-TAIL-02",
+      "sample_query": "pet safe indoor low light live plants non toxic",
+      "query_tier": "tail",
+      "monthly_searches": 12900,
+      "legacy_cvr_pct": 0.88,
+      "clarity_cvr_pct": 2.76,
+      "cvr_lift_pct": 213.6,
+      "top_reranked_sku": "SKU-1007 (Calathea & Parlor Palm Pet-Safe Duo - $68)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Unstructured Pet-Safety Attribute Extraction",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "AI.GENERATE_TABLE extracted pet_safe_required=TRUE and matched 'Pet Non-Toxic' in catalog descriptions via text-embedding-005."
+        },
+        {
+          "hypothesis_id": "H2",
+          "title": "ScraperBot Traffic Deflated Historical CTR",
+          "verdict": "CONFIRMED (p < 0.01)",
+          "evidence": "@skill:data-autocleaning filtered 42 automated PriceScraperBot bursts that previously diluted plant category CTR."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 97.8,
+        "semantic_consistency": 96.9,
+        "timeliness": 95.4,
+        "provenance": 95.5
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.hybrid_rrf_candidates",
+        "bytes_billed": 39102464,
+        "slot_ms": 1180,
+        "estimated_cost_usd": 0.00023,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 93.1
+      }
+    },
+    {
+      "cohort_id": "Q-TAIL-03",
+      "sample_query": "scratch resistant pet friendly performance linen sofa living room",
+      "query_tier": "tail",
+      "monthly_searches": 9650,
+      "legacy_cvr_pct": 1.18,
+      "clarity_cvr_pct": 2.69,
+      "cvr_lift_pct": 128.0,
+      "top_reranked_sku": "SKU-1006 (Performance Linen 3-Seater Couch - $980)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "VIP/Gold CLV Segment Affinity",
+          "verdict": "CONFIRMED (p < 0.005)",
+          "evidence": "BQML Global Explain showed customer_clv_segment contributed +0.19 SHAP attribution on high-ticket performance fabric sofas."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 96.5,
+        "semantic_consistency": 97.1,
+        "timeliness": 96.0,
+        "provenance": 96.0
+      },
+      "finops_receipt": {
+        "sql_target": "modeled_search_warehouse.fct_search_conversions",
+        "bytes_billed": 31457280,
+        "slot_ms": 940,
+        "estimated_cost_usd": 0.00018,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 94.2
+      }
+    },
+    {
+      "cohort_id": "Q-TORSO-01",
+      "sample_query": "mid century modern dining table solid walnut",
+      "query_tier": "torso",
+      "monthly_searches": 21500,
+      "legacy_cvr_pct": 2.45,
+      "clarity_cvr_pct": 3.58,
+      "cvr_lift_pct": 46.1,
+      "top_reranked_sku": "SKU-1003 (Solid Walnut 6-Seater Dining Table - $649)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Wood Finish Disambiguation via Multimodal Embedding",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "Re-ranking mapped visual tone and material specifications directly to catalog images, reducing bounce rates by 34%."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 98.4,
+        "semantic_consistency": 97.8,
+        "timeliness": 95.8,
+        "provenance": 96.2
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.clarity_reranked_search_results",
+        "bytes_billed": 34603008,
+        "slot_ms": 1020,
+        "estimated_cost_usd": 0.00020,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 93.6
+      }
+    },
+    {
+      "cohort_id": "Q-TORSO-02",
+      "sample_query": "wireless noise cancelling headphones travel case",
+      "query_tier": "torso",
+      "monthly_searches": 28400,
+      "legacy_cvr_pct": 2.80,
+      "clarity_cvr_pct": 3.85,
+      "cvr_lift_pct": 37.5,
+      "top_reranked_sku": "SKU-1008 (AeroSound QuietPro Wireless - $199)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Bundled Accessory Query Resolution",
+          "verdict": "CONFIRMED (p < 0.01)",
+          "evidence": "Lexical BM25 prioritized loose cases; hybrid vector RRF matched headphones that include a premium travel case."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 98.9,
+        "semantic_consistency": 98.0,
+        "timeliness": 96.1,
+        "provenance": 96.5
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.clarity_reranked_search_results",
+        "bytes_billed": 36700160,
+        "slot_ms": 1080,
+        "estimated_cost_usd": 0.00021,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 93.2
+      }
+    },
+    {
+      "cohort_id": "Q-HEAD-01",
+      "sample_query": "office chair",
+      "query_tier": "head",
+      "monthly_searches": 44200,
+      "legacy_cvr_pct": 4.82,
+      "clarity_cvr_pct": 5.34,
+      "cvr_lift_pct": 10.8,
+      "top_reranked_sku": "SKU-1001 (AeroMesh Ergonomic Chair - $279)",
+      "status_badge": "STABLE_HEAD_CORE",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Head Query Already Well-Served by Lexical BM25",
+          "verdict": "CONFIRMED",
+          "evidence": "2-token head queries have only 2.7% zero-result rate; BQML re-ranker still adds +10.8% relative CVR via rating & CLV personalization."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 99.1,
+        "semantic_consistency": 98.4,
+        "timeliness": 96.2,
+        "provenance": 96.8
+      },
+      "finops_receipt": {
+        "sql_target": "modeled_search_warehouse.fct_search_conversions",
+        "bytes_billed": 28311552,
+        "slot_ms": 810,
+        "estimated_cost_usd": 0.00016,
+        "maximum_bytes_billed_cap": 10737418240,
+        "partition_pruning_pct": 94.8
+      }
+    }
+  ],
+  "finops_ledger": {
+    "guardrails": {
+      "bigquery_bytes_cap": "10 GB (@@maximum_bytes_billed = 10737418240)",
+      "bigquery_partitioning": "Daily partition on `event_date` (92.4% bytes avoided vs full table scan)",
+      "spark_executors_cap": "8 executors (maxExecutors = 8, dynamicAllocation enabled)",
+      "spark_idle_ttl": "1,800s (30 min auto-shutdown on idle sessions)",
+      "cloud_run_specs": "1 vCPU, 2 GiB RAM, min-instances=0 (scale-to-zero), max-instances=10"
+    },
+    "session_metrics": {
+      "queries_executed": 14,
+      "total_bytes_billed_mb": 147.1,
+      "total_slot_ms": 4350,
+      "total_query_cost_usd": 0.00085,
+      "spark_batch_runtime_sec": 142,
+      "spark_batch_cost_usd": 0.082,
+      "cloud_run_monthly_est_usd": 4.20,
+      "total_monthly_compute_usd": 42.50,
+      "annual_projected_revenue_lift_usd": 1248000,
+      "projected_annual_roi_multiplier": "29,364x"
+    }
+  }
+}

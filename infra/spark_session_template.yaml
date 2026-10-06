@@ -1,0 +1,38 @@
+# ==============================================================================
+# Dataproc Serverless / Managed Spark Session Template
+# Modeled directly after demo-generator/modules/lrc_iceberg/infra.py
+# Configures BOTH:
+#   1. `spark.sql.catalog.lrc`: GCP-Native BigLake Iceberg REST Catalog
+#      backed by gs://${PROJECT_ID}-iceberg-lakehouse
+#   2. `spark.sql.catalog.biglakefederated`: Databricks Unity Catalog Federated
+#      BigLake Iceberg REST Catalog backed by gs://${PROJECT_ID}-iceberg-dbx-lakehouse
+# ==============================================================================
+name: projects/${PROJECT_ID}/locations/${REGION}/sessionTemplates/${TEMPLATE_NAME}
+jupyterSession:
+  kernel: PYTHON
+  displayName: "${DISPLAY_NAME}"
+environmentConfig:
+  executionConfig:
+    serviceAccount: ${SPARK_SA}
+    subnetworkUri: ${SUBNET_URI}
+runtimeConfig:
+  version: "2.3"
+  properties:
+    spark.jars.packages: "org.apache.iceberg:iceberg-spark-runtime-3.5_2.13:1.5.0,org.apache.iceberg:iceberg-gcp-bundle:1.5.0,io.delta:delta-spark_2.13:3.2.0"
+    spark.sql.extensions: "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions,io.delta.sql.DeltaSparkSessionExtension"
+    # 1. GCP-Native BigLake Iceberg REST Catalog (lrc)
+    spark.sql.catalog.lrc: "org.apache.iceberg.spark.SparkCatalog"
+    spark.sql.catalog.lrc.type: "rest"
+    spark.sql.catalog.lrc.uri: "https://biglake.googleapis.com/iceberg/v1/restcatalog"
+    spark.sql.catalog.lrc.warehouse: "${NATIVE_LAKEHOUSE_BUCKET}"
+    spark.sql.catalog.lrc.io-impl: "org.apache.iceberg.gcp.gcs.GCSFileIO"
+    spark.sql.catalog.lrc.header.x-goog-user-project: "${PROJECT_ID}"
+    spark.sql.catalog.lrc.header.X-Iceberg-Access-Delegation: "vended-credentials"
+    # 2. Databricks (DBX) Federated BigLake Iceberg REST Catalog (biglakefederated)
+    spark.sql.catalog.biglakefederated: "org.apache.iceberg.spark.SparkCatalog"
+    spark.sql.catalog.biglakefederated.type: "rest"
+    spark.sql.catalog.biglakefederated.uri: "https://biglake.googleapis.com/iceberg/v1/restcatalog"
+    spark.sql.catalog.biglakefederated.warehouse: "bl://projects/${PROJECT_ID}/catalogs/${FEDERATED_CATALOG}"
+    spark.sql.catalog.biglakefederated.io-impl: "org.apache.iceberg.gcp.gcs.GCSFileIO"
+    spark.sql.catalog.biglakefederated.header.x-goog-user-project: "${PROJECT_ID}"
+    spark.sql.catalog.biglakefederated.header.X-Iceberg-Access-Delegation: "vended-credentials"

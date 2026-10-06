@@ -1,0 +1,33 @@
+catalogPublishingEnabled: true
+rules:
+  - column: search_event_id
+    dimension: COMPLETENESS
+    name: search-event-id-not-null
+    nonNullExpectation: {}
+    threshold: 1.0
+  - column: search_event_id
+    dimension: UNIQUENESS
+    name: search-event-id-unique
+    uniquenessExpectation: {}
+    threshold: 1.0
+  - column: customer_id
+    dimension: COMPLETENESS
+    name: customer-id-not-null
+    nonNullExpectation: {}
+    threshold: 1.0
+  - column: query_tier
+    dimension: VALIDITY
+    name: valid-query-tier
+    setExpectation:
+      values:
+        - head
+        - torso
+        - tail
+    threshold: 1.0
+  - column: attributed_revenue_usd
+    dimension: VALIDITY
+    name: non-negative-attributed-revenue
+    rangeExpectation:
+      minValue: "0"
+      strictMinEnabled: false
+    threshold: 1.0

@@ -1,0 +1,210 @@
+{
+  "app_metadata": {
+    "title": "Project Clarity — Retail Search & Conversion Intelligence",
+    "subtitle": "Built & Deployed with Google Cloud Data Agent Kit (VS Code + DAK + AGY)",
+    "last_refreshed_utc": "2026-09-30T16:30:00Z",
+    "dataplex_glossary_grounded": true,
+    "biglake_iceberg_catalog": "your-gcp-project-id.lrc"
+  },
+  "kpi_cards": [
+    {
+      "id": "tail_query_cvr",
+      "label": "Long-Tail Query CVR (4+ Tokens)",
+      "value": "2.84%",
+      "baseline_value": "1.10%",
+      "delta": "+158.2% lift",
+      "status": "positive",
+      "glossary_term": "cvr_search_conversion_rate"
+    },
+    {
+      "id": "rpss_revenue",
+      "label": "Revenue Per 1,000 Searches (RPSS)",
+      "value": "$142.60",
+      "baseline_value": "$94.40",
+      "delta": "+$48.20 (+51.1%)",
+      "status": "positive",
+      "glossary_term": "rpss_revenue_per_thousand_searches"
+    },
+    {
+      "id": "tail_zero_result_rate",
+      "label": "Tail Query Zero-Result Rate",
+      "value": "8.4%",
+      "baseline_value": "38.0%",
+      "delta": "-29.6 pts (-77.9%)",
+      "status": "positive",
+      "glossary_term": "tail_query_cohort"
+    },
+    {
+      "id": "data_trust_score",
+      "label": "4D Data & Model Trust Score",
+      "value": "96.4%",
+      "baseline_value": "90.0% SLA",
+      "delta": "PASS (4/4 Gates)",
+      "status": "positive",
+      "glossary_term": "position_bias_debiasing"
+    }
+  ],
+  "abc_experiment_chart": {
+    "tiers": ["Head (1-2 Tokens)", "Torso (3 Tokens)", "Tail (4+ Tokens)"],
+    "arm_a_legacy_lexical_cvr": [4.82, 2.65, 1.10],
+    "arm_b_hybrid_vector_rrf_cvr": [4.95, 3.18, 2.15],
+    "arm_c_clarity_bqml_reranked_cvr": [5.34, 3.72, 2.84]
+  },
+  "forecast_30d_chart": {
+    "dates": [
+      "2026-10-01", "2026-10-05", "2026-10-10", "2026-10-15",
+      "2026-10-20", "2026-10-25", "2026-10-30"
+    ],
+    "forecast_revenue_usd": [48200, 51400, 54900, 58100, 61800, 65200, 69400],
+    "ci_95_lower_usd": [44800, 47500, 50200, 53100, 56000, 58900, 62400],
+    "ci_95_upper_usd": [51600, 55300, 59600, 63100, 67600, 71500, 76400]
+  },
+  "query_cohorts_table": [
+    {
+      "cohort_id": "Q-TAIL-01",
+      "sample_query": "ergonomic mesh home office chair under 300 lumbar support",
+      "query_tier": "tail",
+      "monthly_searches": 18400,
+      "legacy_cvr_pct": 1.05,
+      "clarity_cvr_pct": 3.12,
+      "cvr_lift_pct": 197.1,
+      "top_reranked_sku": "SKU-1001 (AeroMesh Ergonomic Chair - $279)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Lexical Synonym & Attribute Mismatch",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "Legacy BM25 failed on 'under 300' price predicate; AI.GENERATE_TABLE + VECTOR_SEARCH recovered 94% of relevant mesh chairs."
+        },
+        {
+          "hypothesis_id": "H2",
+          "title": "Historical Position Bias Buried SKU-1001 at Rank 7",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "Counterfactual Rank-1 BQML scoring promoted SKU-1001 from Rank 7 to Rank 1, increasing CTR from 2.8% to 14.2%."
+        },
+        {
+          "hypothesis_id": "H3",
+          "title": "Inventory Stockout Distortion",
+          "verdict": "REFUTED",
+          "evidence": "stg_catalog_items WHERE EXISTS check confirmed 98.4% in-stock availability."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 98.2,
+        "semantic_consistency": 97.5,
+        "timeliness": 95.0,
+        "provenance": 94.9
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.clarity_reranked_search_results",
+        "bytes_billed": 48234496,
+        "slot_ms": 1420,
+        "estimated_cost_usd": 0.00028,
+        "maximum_bytes_billed_cap": 10737418240
+      }
+    },
+    {
+      "cohort_id": "Q-TAIL-02",
+      "sample_query": "pet safe indoor low light live plants non toxic",
+      "query_tier": "tail",
+      "monthly_searches": 12900,
+      "legacy_cvr_pct": 0.88,
+      "clarity_cvr_pct": 2.76,
+      "cvr_lift_pct": 213.6,
+      "top_reranked_sku": "SKU-1007 (Calathea & Parlor Palm Pet-Safe Duo - $68)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Unstructured Pet-Safety Attribute Extraction",
+          "verdict": "CONFIRMED (p < 0.001)",
+          "evidence": "AI.GENERATE_TABLE extracted pet_safe_required=TRUE and matched 'Pet Non-Toxic' in catalog descriptions via text-embedding-005."
+        },
+        {
+          "hypothesis_id": "H2",
+          "title": "ScraperBot Traffic Deflated Historical CTR",
+          "verdict": "CONFIRMED (p < 0.01)",
+          "evidence": "@skill:data-autocleaning filtered 42 automated PriceScraperBot bursts that previously diluted plant category CTR."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 97.8,
+        "semantic_consistency": 96.9,
+        "timeliness": 95.4,
+        "provenance": 95.5
+      },
+      "finops_receipt": {
+        "sql_target": "serving_clarity_intelligence.hybrid_rrf_candidates",
+        "bytes_billed": 39102464,
+        "slot_ms": 1180,
+        "estimated_cost_usd": 0.00023,
+        "maximum_bytes_billed_cap": 10737418240
+      }
+    },
+    {
+      "cohort_id": "Q-TAIL-03",
+      "sample_query": "scratch resistant pet friendly performance linen sofa living room",
+      "query_tier": "tail",
+      "monthly_searches": 9650,
+      "legacy_cvr_pct": 1.18,
+      "clarity_cvr_pct": 2.69,
+      "cvr_lift_pct": 128.0,
+      "top_reranked_sku": "SKU-1006 (Performance Linen 3-Seater Couch - $980)",
+      "status_badge": "HIGH_LIFT_VERIFIED",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "VIP/Gold CLV Segment Affinity",
+          "verdict": "CONFIRMED (p < 0.005)",
+          "evidence": "BQML Global Explain showed customer_clv_segment contributed +0.19 SHAP attribution on high-ticket performance fabric sofas."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 96.5,
+        "semantic_consistency": 97.1,
+        "timeliness": 96.0,
+        "provenance": 96.0
+      },
+      "finops_receipt": {
+        "sql_target": "modeled_search_warehouse.fct_search_conversions",
+        "bytes_billed": 31457280,
+        "slot_ms": 940,
+        "estimated_cost_usd": 0.00018,
+        "maximum_bytes_billed_cap": 10737418240
+      }
+    },
+    {
+      "cohort_id": "Q-HEAD-01",
+      "sample_query": "office chair",
+      "query_tier": "head",
+      "monthly_searches": 44200,
+      "legacy_cvr_pct": 4.82,
+      "clarity_cvr_pct": 5.34,
+      "cvr_lift_pct": 10.8,
+      "top_reranked_sku": "SKU-1001 (AeroMesh Ergonomic Chair - $279)",
+      "status_badge": "STABLE_HEAD_CORE",
+      "diagnostic_hypotheses": [
+        {
+          "hypothesis_id": "H1",
+          "title": "Head Query Already Well-Served by Lexical BM25",
+          "verdict": "CONFIRMED",
+          "evidence": "2-token head queries have only 2.7% zero-result rate; BQML re-ranker still adds +10.8% relative CVR via rating & CLV personalization."
+        }
+      ],
+      "trust_4d_audit": {
+        "completeness": 99.1,
+        "semantic_consistency": 98.4,
+        "timeliness": 96.2,
+        "provenance": 96.8
+      },
+      "finops_receipt": {
+        "sql_target": "modeled_search_warehouse.fct_search_conversions",
+        "bytes_billed": 28311552,
+        "slot_ms": 810,
+        "estimated_cost_usd": 0.00016,
+        "maximum_bytes_billed_cap": 10737418240
+      }
+    }
+  ]
+}

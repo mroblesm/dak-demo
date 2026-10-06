@@ -1,0 +1,55 @@
+version: 2
+
+# ==============================================================================
+# Enforces @skill:dbt-bigquery Testing & Validation Rules:
+#   - Schema tests (`not_null`, `unique`, `accepted_values`)
+#   - Native dbt 1.8+ `unit_tests:` validating cleaning, bot removal, and
+#     conversion rollup logic without scanning production data.
+# ==============================================================================
+
+models:
+  - name: stg_search_events
+    description: "Cleaned, normalized, bot-filtered, and deduplicated search events from BigLake Iceberg."
+    columns:
+      - name: search_event_id
+        tests:
+          - not_null
+          - unique
+      - name: query_tier
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['head', 'torso', 'tail']
+      - name: device_type
+        tests:
+          - not_null
+
+  - name: fct_search_conversions
+    description: "Session-level search conversion and attributed revenue mart."
+    columns:
+      - name: search_event_id
+        tests:
+          - not_null
+          - unique
+      - name: purchased
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: attributed_revenue_usd
+        tests:
+          - not_null
+
+unit_tests:
+  - name: test_stg_search_events_autocleaning_and_dedup
+    description: "Verifies @skill:data-autocleaning trims whitespace, lowercases query text, coalesces NULL device_type, filters ScraperBot, and deduplicates retry rows."
+    model: stg_search_events
+    given:
+      - input: source('raw_iceberg', 'search_events')
+        rows:
+          - {search_event_id: 'SRCH-001', customer_id: 'CUST-01', raw_query_text: '   ERGONOMIC MESH OFFICE CHAIR UNDER 300  ', device_type: null, user_agent: 'Mozilla/5.0', zero_results_flag: 0, search_algorithm_arm: 'arm_c_clarity_reranked', event_timestamp: '2026-09-20T10:00:05Z', event_date: '2026-09-20'}
+          - {search_event_id: 'SRCH-001', customer_id: 'CUST-01', raw_query_text: '   ERGONOMIC MESH OFFICE CHAIR UNDER 300  ', device_type: null, user_agent: 'Mozilla/5.0', zero_results_flag: 0, search_algorithm_arm: 'arm_c_clarity_reranked', event_timestamp: '2026-09-20T10:00:01Z', event_date: '2026-09-20'}
+          - {search_event_id: 'SRCH-BOT', customer_id: 'CUST-99', raw_query_text: 'velvet sofa', device_type: 'desktop', user_agent: 'Mozilla/5.0 (compatible; PriceScraperBot/2.1)', zero_results_flag: 0, search_algorithm_arm: 'ARM_A_LEGACY_LEXICAL', event_timestamp: '2026-09-20T10:01:00Z', event_date: '2026-09-20'}
+    expect:
+      rows:
+        - {search_event_id: 'SRCH-001', customer_id: 'CUST-01', normalized_query_text: 'ergonomic mesh office chair under 300', query_length_tokens: 6, query_tier: 'tail', device_type: 'unknown_device', zero_results_flag: 0, search_algorithm_arm: 'ARM_C_CLARITY_RERANKED', event_date: '2026-09-20'}

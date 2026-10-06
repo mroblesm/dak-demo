@@ -1,0 +1,9 @@
+# Copy this file to infra/terraform.tfvars and set your GCP Project ID:
+project_id        = "your-gcp-project-id"
+region            = "us-central1"
+bq_location       = "US"
+raw_dataset_id    = "raw_retail_core"
+modeled_dataset_id = "modeled_search_warehouse"
+serving_dataset_id = "serving_clarity_intelligence"
+composer_env_name = "clarity-composer-dev"
+enable_composer   = false

@@ -1,0 +1,34 @@
+# Private demo preparation, internal slide decks, and sanitization checks
+_private_demo_prep/
+.golden_backup.tar.gz
+
+# Local environment & credentials
+.env
+.env.*
+!.env.example
+infra/terraform.tfvars
+infra/.terraform/
+infra/*.tfstate*
+infra/tfplan
+
+# Agent-generated output workspace (when running prompts/)
+workspace/
+
+# Generated synthetic data & build artifacts
+data_setup/generated/
+target/
+dbt_packages/
+logs/
+
+# Python virtual environments & caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS & Editor files
+.DS_Store
+*.swp

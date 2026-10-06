@@ -1,0 +1,59 @@
+# ==============================================================================
+# Step 4 (Alternative 4A): Declarative Orchestration Pipelines Deployment Spec
+# Adheres to @skill:gcp-data-cloud-pipeline-orchestration-definition-skill:
+#   - Defines `dev`, `staging`, and `prod` environments
+#   - Uses `composer_environment` and composite `artifact_storage` (`bucket` + `path_prefix`)
+#   - Parameterizes `variables` injected into `orchestration-pipeline.yaml`
+# ==============================================================================
+
+environments:
+  dev:
+    project: your-gcp-project-id
+    region: us-central1
+    composer_environment: clarity-composer-dev
+    artifact_storage:
+      bucket: your-gcp-project-id-orchestration-artifacts
+      path_prefix: retail-search-dev
+    variables:
+      project_id: your-gcp-project-id
+      region: us-central1
+      raw_dataset: raw_retail_core
+      modeled_dataset: modeled_search_warehouse
+      serving_dataset: serving_clarity_intelligence
+      lakehouse_bucket: gs://your-gcp-project-id-iceberg-lakehouse
+    pipelines:
+      - source: orchestration-pipeline.yaml
+
+  staging:
+    project: your-gcp-project-id
+    region: us-central1
+    composer_environment: clarity-composer-staging
+    artifact_storage:
+      bucket: your-gcp-project-id-orchestration-artifacts
+      path_prefix: retail-search-staging
+    variables:
+      project_id: your-gcp-project-id
+      region: us-central1
+      raw_dataset: raw_retail_core
+      modeled_dataset: modeled_search_warehouse
+      serving_dataset: serving_clarity_intelligence
+      lakehouse_bucket: gs://your-gcp-project-id-iceberg-lakehouse
+    pipelines:
+      - source: orchestration-pipeline.yaml
+
+  prod:
+    project: your-gcp-project-id
+    region: us-central1
+    composer_environment: clarity-composer-prod
+    artifact_storage:
+      bucket: your-gcp-project-id-orchestration-artifacts
+      path_prefix: retail-search-prod
+    variables:
+      project_id: your-gcp-project-id
+      region: us-central1
+      raw_dataset: raw_retail_core
+      modeled_dataset: modeled_search_warehouse
+      serving_dataset: serving_clarity_intelligence
+      lakehouse_bucket: gs://your-gcp-project-id-iceberg-lakehouse
+    pipelines:
+      - source: orchestration-pipeline.yaml

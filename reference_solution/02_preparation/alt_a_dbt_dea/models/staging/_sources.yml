@@ -1,0 +1,51 @@
+version: 2
+
+# ==============================================================================
+# Complementary Step 2 Architecture (Stage 2.1 Managed Spark -> Stage 2.2 dbt):
+#   Enforces @skill:dbt-bigquery & @skill:biglake-management:
+#   BigLake Managed Apache Iceberg tables (provisioned across GCP / Databricks)
+#   use 4-part identifiers:
+#     `<project>.<catalog>.<namespace>.<table>`
+#   In dbt _sources.yml, we concatenate `<catalog>.<namespace>` inside `schema:`
+#   so `{{ source('raw_iceberg', 'search_events') }}` compiles to:
+#     `<project>.biglakefederated.raw_search_telemetry.search_events`
+#   (with automatic fallback to `raw_retail_core` when `ICEBERG_CATALOG_SCHEMA`
+#   is not set in environments without cross-cloud Databricks federation).
+# ==============================================================================
+
+sources:
+  - name: raw_iceberg
+    description: "Databricks Federated BigLake Apache Iceberg REST Catalog (biglakefederated) Bronze Layer"
+    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    schema: "{{ env_var('ICEBERG_CATALOG_SCHEMA', 'raw_retail_core') }}"
+    tables:
+      - name: search_events
+        description: "Cross-cloud search telemetry federated from Databricks Unity Catalog via BigLake LRC (biglakefederated)"
+
+  - name: raw_native_iceberg
+    description: "GCP-Native BigLake Managed Apache Iceberg REST Catalog (lrc) Bronze Layer"
+    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    schema: "{{ env_var('NATIVE_LRC_CATALOG_ID', 'lrc') }}.raw_search_telemetry"
+    tables:
+      - name: search_impressions
+        description: "Ranked top-10 search impressions managed in GCP-Native BigLake Iceberg LRC"
+
+  - name: spark_curated_iceberg
+    description: "Stage 2.1 Managed Spark output with SHA-256 PII pseudonymisation & 30m sessions"
+    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    schema: "{{ env_var('NATIVE_LRC_CATALOG_ID', 'your-gcp-project-id-iceberg-lakehouse') }}.modeled_search_warehouse"
+    tables:
+      - name: sessionized_searches
+        description: "Pseudonymised and sessionized search events written by Managed Spark"
+
+  - name: raw_bigquery
+    description: "Standard BigQuery Bronze Layer Retail Core tables (raw_retail_core)"
+    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    schema: "{{ env_var('RAW_DATASET_ID', 'raw_retail_core') }}"
+    tables:
+      - name: search_impressions
+        description: "Ranked top-10 search impressions, clicks, and purchases"
+      - name: catalog_items
+        description: "Retail home & furniture product catalog metadata"
+      - name: customer_clv
+        description: "Customer lifecycle value (CLV) segments and historical order metrics"

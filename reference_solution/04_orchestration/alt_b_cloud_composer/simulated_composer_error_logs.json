@@ -1,0 +1,30 @@
+[
+  {
+    "insertId": "composer-rca-log-001",
+    "timestamp": "2026-09-30T04:02:14.812Z",
+    "severity": "ERROR",
+    "resource": {
+      "type": "cloud_composer_environment",
+      "labels": {
+        "project_id": "your-gcp-project-id",
+        "environment_name": "clarity-composer-env",
+        "location": "us-central1"
+      }
+    },
+    "labels": {
+      "dag_id": "broken_dag_for_rca_demo",
+      "task_id": "run_dbt_conversion_marts",
+      "execution_date": "2026-09-30T04:00:00+00:00",
+      "worker_id": "airflow-worker-7c9d8b"
+    },
+    "jsonPayload": {
+      "logger": "airflow.task",
+      "message": "Task failed with exception: google.api_core.exceptions.BadRequest: 400 GET https://bigquery.googleapis.com/bigquery/v2/projects/your-gcp-project-id/jobs/bquxjob_49102a: Table `your-gcp-project-id.raw_search_telemetry.search_events` is registered in BigLake Iceberg catalog `lrc` (`your-gcp-project-id.lrc.raw_search_telemetry.search_events`) and requires a partition filter over column `event_date` (require_partition_filter = true).",
+      "traceback": [
+        "File \"/opt/python3.11/lib/python3.11/site-packages/airflow/providers/google/cloud/operators/bigquery.py\", line 2681, in execute",
+        "File \"/home/airflow/gcs/dags/broken_dag_for_rca_demo.py\", line 31, in <module>",
+        "google.api_core.exceptions.BadRequest: 400 Cannot query over table 'your-gcp-project-id.lrc.raw_search_telemetry.search_events' without a filter over column(s) 'event_date' and 4-part catalog identifier."
+      ]
+    }
+  }
+]

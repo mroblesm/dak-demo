@@ -1,0 +1,38 @@
+{
+  "protocol": "google.cloud.a2a.v1",
+  "target_agent": {
+    "agent_id": "gcp-data-engineering-agent",
+    "documentation_ref": "https://cloud.google.com/bigquery/docs/data-engineering-agent",
+    "release_stage": "GA",
+    "endpoint": "https://dataengineeringagent.googleapis.com/v1/projects/your-gcp-project-id/locations/us-central1:invokeAgentWorkflow"
+  },
+  "caller_context": {
+    "ide_environment": "vscode-datacloud-extension",
+    "agent_harness": "antigravity-agy",
+    "active_dak_skills": [
+      "gcp-data-pipelines",
+      "dbt-bigquery",
+      "data-autocleaning",
+      "bigquery-optimization"
+    ]
+  },
+  "workflow_task": {
+    "task_id": "retail-search-dbt-medallion-pipeline",
+    "intent": "Generate, clean, optimize, and unit-test dbt-bigquery staging and mart models over BigLake Managed Iceberg table your-gcp-project-id.biglakefederated.raw_search_telemetry.search_events.",
+    "parameters": {
+      "source_iceberg_table": "your-gcp-project-id.biglakefederated.raw_search_telemetry.search_events",
+      "source_impressions_table": "your-gcp-project-id.raw_retail_core.search_impressions",
+      "target_dataset": "modeled_search_warehouse",
+      "enforce_autocleaning": true,
+      "enforce_sql_slot_optimization": true,
+      "generate_dbt_unit_tests": true,
+      "enrich_knowledge_catalog_metadata": true,
+      "apply_ai_semantic_tags": true,
+      "publish_quality_scorecard_to_knowledge_catalog": true,
+      "knowledge_catalog_aspect_types": [
+        "projects/dataplex-types/locations/global/aspectTypes/data-quality-scorecard",
+        "projects/dataplex-types/locations/global/aspectTypes/ai-semantic-enrichment"
+      ]
+    }
+  }
+}

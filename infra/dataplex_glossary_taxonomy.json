@@ -1,0 +1,65 @@
+{
+  "glossary_id": "clarity_retail_search_glossary",
+  "display_name": "Project Clarity — Retail Search & Conversion Business Glossary",
+  "description": "Verified enterprise business definitions used by Google Cloud Data Agent Kit (@skill:discovering-gcp-data-assets) to eliminate SQL hallucinations and ground semantic search.",
+  "categories": [
+    {
+      "category_id": "search_relevance_metrics",
+      "display_name": "Search Relevance & Conversion KPIs",
+      "description": "Standardized e-commerce search efficacy and monetization definitions."
+    },
+    {
+      "category_id": "query_classification",
+      "display_name": "Query Taxonomy & Bias Adjustments",
+      "description": "Definitions for query length cohorts and ranking bias adjustments."
+    }
+  ],
+  "terms": [
+    {
+      "term_id": "cvr_search_conversion_rate",
+      "display_name": "Search Conversion Rate (CVR)",
+      "category": "search_relevance_metrics",
+      "definition": "Percentage of non-bot search sessions where at least one displayed impression results in a completed purchase event within the same 30-minute session window.",
+      "canonical_sql_formula": "SAFE_DIVIDE(COUNT(DISTINCT CASE WHEN purchased = 1 THEN search_event_id END), COUNT(DISTINCT search_event_id))",
+      "verified_tables": [
+        "modeled_search_warehouse.fct_search_conversions",
+        "serving_clarity_intelligence.abc_experiment_summary"
+      ],
+      "steward": "search-analytics-governance@example.com"
+    },
+    {
+      "term_id": "rpss_revenue_per_thousand_searches",
+      "display_name": "Revenue Per 1,000 Search Sessions (RPSS)",
+      "category": "search_relevance_metrics",
+      "definition": "Total net order revenue (USD) attributed to search-driven purchases divided by total non-bot search sessions, multiplied by 1,000.",
+      "canonical_sql_formula": "SAFE_DIVIDE(SUM(attributed_revenue_usd), COUNT(DISTINCT search_event_id)) * 1000.0",
+      "verified_tables": [
+        "modeled_search_warehouse.fct_search_conversions"
+      ],
+      "steward": "finops-monetization@example.com"
+    },
+    {
+      "term_id": "tail_query_cohort",
+      "display_name": "Long-Tail Search Query (Tail Query)",
+      "category": "query_classification",
+      "definition": "A normalized user search query containing 4 or more whitespace-delimited tokens (e.g., 'ergonomic mesh home office chair under 300') that specifies composite intent attributes such as room, material, style, or price ceiling.",
+      "canonical_sql_formula": "ARRAY_LENGTH(SPLIT(TRIM(normalized_query_text), ' ')) >= 4",
+      "verified_tables": [
+        "modeled_search_warehouse.stg_search_events",
+        "modeled_search_warehouse.fct_search_conversions"
+      ],
+      "steward": "search-ml-team@example.com"
+    },
+    {
+      "term_id": "position_bias_debiasing",
+      "display_name": "Position Bias & Counterfactual Rank-1 Debiasing",
+      "category": "query_classification",
+      "definition": "Historical click and conversion logs suffer from examination decay (Rank 1 receives ~4.5x the attention of Rank 8 regardless of true relevance). During training, displayed_rank_position is included as a control feature; during ML.PREDICT inference, displayed_rank_position is fixed to 1 for all candidates to score unbiased intrinsic relevance.",
+      "canonical_sql_formula": "1 AS displayed_rank_position /* Counterfactual Rank-1 setting inside ML.PREDICT */",
+      "verified_tables": [
+        "serving_clarity_intelligence.bqml_conversion_reranker"
+      ],
+      "steward": "search-ml-team@example.com"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+@skill:gcp-spark @skill:biglake-management @skill:notebook-best-practices
+Read the project configuration from .env (or .env.example if .env is not present: GCP_PROJECT_ID, GCP_REGION, LAKEHOUSE_BUCKET, SPARK_SESSION_TEMPLATE).
+Create the directory `workspace/02_preparation/alt_b_serverless_spark/` and generate the following three files:
+
+1. `workspace/02_preparation/alt_b_serverless_spark/spark_medallion_prep.py`:
+   - Configure PySpark for **Dataproc Serverless Runtime 2.3** (Spark 3.5, Scala 2.13) with Iceberg `1.5.0` (`org.apache.iceberg:iceberg-spark-runtime-3.5_2.13:1.5.0,org.apache.iceberg:iceberg-gcp-bundle:1.5.0,io.delta:delta-spark_2.13:3.2.0`).
+   - Refresh Application Default Credentials (`google.auth.default()`) and inject the OAuth Bearer token into `spark.sql.catalog.lrc.header.Authorization = f"Bearer {creds.token}"` and `spark.sql.catalog.biglakefederated.header.Authorization = f"Bearer {creds.token}"` (alongside `header.X-Iceberg-Access-Delegation = vended-credentials` and `io-impl = org.apache.iceberg.gcp.gcs.GCSFileIO`).
+   - Implement `read_cross_cloud_search_events(spark)` that attempts to read `biglakefederated.raw_search_telemetry.search_events` (calling `.limit(1).count()` to force resolution) and automatically falls back to `spark.read.json(f"gs://{project_id}-iceberg-lakehouse/dbx_seed_data/search_events.jsonl")` if the federated catalog is not active.
+   - Implement `pseudonymize_pii_columns(df, pii_salt)` using `F.sha2(F.concat_ws(":", F.lit(pii_salt), ...), 256)` on `customer_id` (`pseudonymized_customer_id`), and hashing + dropping raw `user_email`, `ip_address`, and `client_ip` columns.
+   - Implement `transform_bronze_to_silver(raw_events_df)`: call `raw_events_df.printSchema()` before referencing columns (`@skill:gcp-spark` mandatory rule), pseudonymize PII, filter out bots (`~F.lower(F.coalesce(F.col("user_agent"), F.lit(""))).rlike("scraperbot|crawler|spider")`), deduplicate `search_event_id` via `Window.partitionBy("search_event_id").orderBy(F.col("event_ts").desc())`, and compute 30-minute (1800s) session boundaries (`clarity_session_id`).
+   - Write to `lrc.modeled_search_warehouse.sessionized_searches` partitioned by `event_date` with `write.wap.enabled = true`.
+   - Implement `write_to_iceberg_branch_and_audit(spark, df, table_ident, branch_name="audit_branch")` using `ALTER TABLE ... CREATE BRANCH IF NOT EXISTS audit_branch RETAIN 7 DAYS`, appending a micro-batch to `.branch_audit_branch`, auditing for zero NULL `pseudonymized_customer_id`, and fast-forwarding `main` (`CALL lrc.system.fast_forward(...)`).
+   - Implement `rollback_iceberg_table_zero_scan(spark, table_ident)` querying `<table_ident>.snapshots` and executing `CALL lrc.system.rollback_to_snapshot(...)`.
+
+2. `workspace/02_preparation/alt_b_serverless_spark/spark_medallion_prep.ipynb`:
+   - Define all helper functions (`read_cross_cloud_search_events`, `pseudonymize_pii_columns`, `transform_bronze_to_silver`, `write_to_iceberg_branch_and_audit`, `rollback_iceberg_table_zero_scan`) **inline inside the notebook cells** (do NOT use `from spark_medallion_prep import ...`, which raises `ModuleNotFoundError` when connected to a remote Dataproc Serverless Jupyter kernel).
+   - In Cell 1, detect whether the notebook is running inside a remote Dataproc Serverless Jupyter kernel (`os.path.exists("/usr/lib/spark")`, using `SparkSession.builder`) or a local Python kernel (using `DataprocSparkSession` with session template `clarity-lrc-spark-template`), and inject the `Bearer` token into `spark.sql.catalog.{lrc,biglakefederated}.header.Authorization`.
+   - In the final cell (WAP branching & zero-scan rollback), re-acquire `spark = SparkSession.builder.getOrCreate()`, refresh the Bearer token on `spark.conf`, and pass a 50-row micro-batch (`spark.table("lrc.modeled_search_warehouse.sessionized_searches").limit(50)`) into `write_to_iceberg_branch_and_audit` so the cell completes in ~2 seconds without re-running the full window shuffle.
+
+3. `workspace/02_preparation/alt_b_serverless_spark/submit_serverless_batch.sh`:
+   - An executable bash script (supporting `--dry-run`) that submits `spark_medallion_prep.py` via `gcloud dataproc batches submit pyspark` on `--version=2.3` with FinOps guardrails (`spark.dynamicAllocation.maxExecutors=8`, `--ttl=1800s`, `--subnet=dataproc-serverless-subnet`).

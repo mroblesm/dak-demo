@@ -1,0 +1,15 @@
+# Enforces @skill:dbt-bigquery OAuth authentication & concurrency standards
+clarity_bigquery_oauth:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+      dataset: "{{ env_var('MODELED_DATASET_ID', 'modeled_search_warehouse') }}"
+      location: "{{ env_var('BQ_LOCATION', 'US') }}"
+      threads: 4
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      maximum_bytes_billed: 10737418240
+      priority: interactive
